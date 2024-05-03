@@ -36,7 +36,7 @@ def main():
     for address in arrest_addresses:
         lat, lon = get_lat_lon(address)
         if lat is not None and lon is not None:
-            folium.Marker([lat, lon], popup=address).add_to(address_map)
+            folium.Marker([lat, lon], popup=address).add_to(arrest_map)
 
     # Save the maps to an HTML file
     residence_map.save('residence_map.html')
