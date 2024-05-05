@@ -96,15 +96,12 @@ def main():
                 if (index + 1) % 3 == 0:
                     charges.append(charge.text)
 
-            if (driver.find_element(By.XPATH, "/html/body/table/tbody/tr[1]/td[2]/table/tbody/tr[3]/td[2]/span").text) == "MALE": sex = 'M'
-            else: sex = 'F'
-
             # collect all other attributes
             attributes = {
             "first name": driver.find_element(By.XPATH, "//span[@columnname='FirstName']").text,
             "last name": driver.find_element(By.XPATH, "/html/body/table/tbody/tr[1]/td[2]/table/tbody/tr[1]/td/span[1]").text,
-            "age": int(driver.find_element(By.XPATH, "/html/body/table/tbody/tr[1]/td[2]/table/tbody/tr[2]/td[2]/span").text),
-            "sex": sex,
+            "age": driver.find_element(By.XPATH, "/html/body/table/tbody/tr[1]/td[2]/table/tbody/tr[2]/td[2]/span").text,
+            "sex": driver.find_element(By.XPATH, "/html/body/table/tbody/tr[1]/td[2]/table/tbody/tr[3]/td[2]/span").text,
             "residence address": driver.find_element(By.XPATH, "/html/body/table/tbody/tr[2]/td/span[2]").text,
             "arrest location": driver.find_element(By.XPATH, "/html/body/table/tbody/tr[3]/td/span[2]").text,
             "arrest date": driver.find_element(By.XPATH, "/html/body/table/tbody/tr[5]/td/table/tbody/tr[3]/td[1]/span").text,
