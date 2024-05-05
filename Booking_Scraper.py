@@ -8,7 +8,7 @@ Resources: https://www.digitalocean.com/community/tutorials/python-time-sleep
 Visualizing the data:
 plot all the arrest locations and residence locations on a map
 use a violin plot for male/female distribution of charges
-show probability of deifferent charges based on time of year
+show probability of different charges based on time of year
 '''
 
 from selenium import webdriver

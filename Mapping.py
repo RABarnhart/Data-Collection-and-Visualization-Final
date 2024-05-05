@@ -1,47 +1,37 @@
 import json
-import requests
 import folium
+import requests
 
-# Function to get latitude and longitude of an address using OpenStreetMap API
-def get_lat_lon(address):
-    url = f'https://nominatim.openstreetmap.org/search?q={address}&format=json'
+# Read the JSON lines file and parse data
+data = []
+with open('bookings.jsonl', 'r') as file:
+    for line in file:
+        record = json.loads(line)
+        data.append(record)
+
+# Extract arrest locations
+arrest_locations = [record["arrest location"] for record in data]
+
+# Initialize a map centered at the first arrest location
+mymap = folium.Map(location=[35.7796, -78.6382], zoom_start=10)
+
+# Function to geocode address using Google Maps Geocoding API
+def geocode_address(address):
+    api_key = 'YOUR_GOOGLE_MAPS_API_KEY'
+    url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}'
     response = requests.get(url)
     if response.status_code == 200:
-        data = response.json()
-        if data:
-            return float(data[0]['lat']), float(data[0]['lon'])
-    return None, None
+        result = response.json()
+        if result['status'] == 'OK':
+            location = result['results'][0]['geometry']['location']
+            return location['lat'], location['lng']
+    return None
 
-def main():
-    # Read the bookings.jsonl file and extract addresses
-    residence_addresses = []    
-    arrest_addresses = []
-    with open('bookings.jsonl', 'r') as f:
-        for line in f:
-            data = json.loads(line)
-            residence_addresses.append(data['residence address'])
-            arrest_addresses.append(data['arrest location'])
+# Add markers for each arrest location
+for address in arrest_locations:
+    location = geocode_address(address)
+    if location:
+        folium.Marker(location=[location[0], location[1]], popup=address).add_to(mymap)
 
-    # Create a map objects
-    residence_map = folium.Map(location=[0, 0], zoom_start=2)
-    arrest_map = folium.Map(location=[0, 0], zoom_start=2)
-
-    # Plot each address on the residence map
-    for address in residence_addresses:
-        lat, lon = get_lat_lon(address)
-        if lat is not None and lon is not None:
-            folium.Marker([lat, lon], popup=address).add_to(residence_map)
-
-    # Plot each address on the arrest map
-    for address in arrest_addresses:
-        lat, lon = get_lat_lon(address)
-        if lat is not None and lon is not None:
-            folium.Marker([lat, lon], popup=address).add_to(arrest_map)
-
-    # Save the maps to an HTML file
-    residence_map.save('residence_map.html')
-    arrest_map.save('arrest_map.html')
-    print("maps made")
-
-if __name__ == '__main__': 
-    main()
+# Save the map to an HTML file
+mymap.save("arrest_locations_map.html")
