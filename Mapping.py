@@ -17,7 +17,7 @@ mymap = folium.Map(location=[35.7796, -78.6382], zoom_start=10)
 
 # Function to geocode address using Google Maps Geocoding API
 def geocode_address(address):
-    api_key = 'YOUR_GOOGLE_MAPS_API_KEY'
+    api_key = 'YOUR_API_KEY_HERE'  # Replace with your actual API key
     url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}'
     response = requests.get(url)
     if response.status_code == 200:
@@ -27,6 +27,7 @@ def geocode_address(address):
             return location['lat'], location['lng']
     return None
 
+print("mapping in progress...")
 # Add markers for each arrest location
 for address in arrest_locations:
     location = geocode_address(address)
@@ -35,3 +36,4 @@ for address in arrest_locations:
 
 # Save the map to an HTML file
 mymap.save("arrest_locations_map.html")
+print("mapping complete")

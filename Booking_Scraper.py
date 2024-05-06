@@ -22,7 +22,7 @@ import json
 def main():
     # datetime object containing current date and time
     date = datetime.now()
-    date_minus_52_weeks = datetime.now() + timedelta(weeks= -52)
+    date_minus_52_weeks = datetime.now() + timedelta(weeks= -20)
 
     # dd/mm/YYYY H:M
     end_date = date.strftime("%m-%d-%Y %H:%M")
@@ -31,7 +31,7 @@ def main():
     # open the driver
     options = webdriver.ChromeOptions()
     options.headless = True
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     driver = webdriver.Chrome(options=options)
     driver.get("https://dwslivescan.co.wake.nc.us/mug/MugshotSearch.aspx")
     print("Scraping in progress...")
