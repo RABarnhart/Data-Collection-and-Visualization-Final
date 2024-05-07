@@ -33,6 +33,6 @@ sns.barplot(x=top_10_charges.values, y=top_10_charges.index, palette='YlOrRd')
 
 plt.xlabel('Charges')
 plt.ylabel('Frequency')
-plt.title('Top 20 Charges')
+plt.title('Top 10 Charges')
 plt.tight_layout()
 plt.show()

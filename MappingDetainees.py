@@ -1,0 +1,39 @@
+import json
+import folium
+import requests
+import os
+
+# Read the JSON lines file and parse data
+data = []
+with open('bookings.jsonl', 'r') as file:
+    for line in file:
+        record = json.loads(line)
+        data.append(record)
+
+# Extract arrest locations
+detainee_locations = [record["residence address"] for record in data]
+
+# Initialize a map centered at the first arrest location
+mymap = folium.Map(location=[35.7796, -78.6382], zoom_start=10)
+
+# Function to geocode address using Google Maps Geocoding API
+def geocode_address(address):
+    url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={os.getenv('API_KEY')}'
+    response = requests.get(url)
+    if response.status_code == 200:
+        result = response.json()
+        if result['status'] == 'OK':
+            location = result['results'][0]['geometry']['location']
+            return location['lat'], location['lng']
+    return None
+
+print("mapping in progress...")
+# Add red dots for each detainee location
+for address in detainee_locations:
+    location = geocode_address(address)
+    if location:
+        folium.CircleMarker(location=[location[0], location[1]], radius=1, color='red', fill=True, fill_color='red', fill_opacity=1, popup=address).add_to(mymap)
+
+# Save the map to an HTML file
+mymap.save("detainee_locations_map.html")
+print("mapping complete")
