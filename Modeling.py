@@ -1,14 +1,11 @@
-'''
-correlation between day of the week and charge
-clustering descriptions based on words, count vectorizer, isomap, color based on offense
-'''
 import json
-import datetime
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Load JSONL file and parse data
 data = []
@@ -20,15 +17,19 @@ with open('bookings.jsonl', 'r') as file:
 df = pd.DataFrame(data)
 df['arrest date'] = pd.to_datetime(df['arrest date'], format='%m-%d-%Y')
 df['day_of_week'] = df['arrest date'].dt.day_name()
-df['charges'] = df['charges'].apply(lambda x: ','.join(x))
 
 # Encode categorical variables
 label_encoder = LabelEncoder()
+df['charges'] = df['charges'].apply(lambda x: ','.join(x))
+df['charge_driving_impaired'] = df['charges'].str.contains('DRIVING WHILE IMPAIRED', case=False)
 df['day_of_week_encoded'] = label_encoder.fit_transform(df['day_of_week'])
-df['charges_encoded'] = label_encoder.fit_transform(df['charges'])
+df['charge_driving_impaired'] = label_encoder.fit_transform(df['charge_driving_impaired'])
 
-# Swap X and y
-X = df[['charges_encoded']]
+# Assign a single label for "Driving while impaired" charge
+df.loc[df['charge_driving_impaired'] == 1, 'charges'] = 'DRIVING WHILE IMPAIRED'
+
+# Split data into features (X) and target (y)
+X = df[['charge_driving_impaired']]
 y = df['day_of_week_encoded']
 
 # Split data into train and test sets
@@ -44,3 +45,33 @@ y_pred = model.predict(X_test)
 # Evaluate accuracy
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy:", accuracy)
+
+# Create classification report
+class_report = classification_report(y_test, y_pred)
+print("Classification Report:\n", class_report)
+
+# Filter dataframe for instances with "Driving while impaired" charge
+df_filtered = df[df['charges'].str.contains('DRIVING WHILE IMPAIRED', case=False)]
+
+# Count occurrences of arrests for "Driving while impaired" by day of the week
+arrests_by_day = df_filtered['day_of_week'].value_counts().sort_index()
+
+# Dark mode styling
+plt.style.use('dark_background')
+
+# Red color palette
+colors = sns.color_palette('Reds', len(arrests_by_day))
+
+# Define the order of days
+days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+# Plot the line plot
+plt.figure(figsize=(10, 6))
+arrests_by_day.loc[days_order].plot(kind='line', marker='o', color='red')
+plt.title('Arrests for "Driving while impaired" by Day of the Week')
+plt.xlabel('Day of the Week')
+plt.ylabel('Number of Occurrences')
+plt.grid(True)
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
