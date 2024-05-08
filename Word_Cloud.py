@@ -3,6 +3,7 @@ from collections import Counter
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
+import numpy as np
 
 # Read the JSON lines file and parse data
 data = []
@@ -11,26 +12,26 @@ with open('bookings.jsonl', 'r') as file:
         record = json.loads(line)
         data.append(record)
 
-# Extract charges for all people
-charges = [record["charges"] for record in data]
-
-# Flatten the list of lists
-charges_flat = [charge for sublist in charges for charge in sublist]
+# Extract officers for all people
+officers = [record["arresting officer"] for record in data]
 
 # Count the occurrences of each word
-word_counts = Counter(charges_flat)
+word_counts = Counter(officers)
 
 # Define a custom color function based on frequency
 def color_func(word, font_size, position, orientation, random_state=None, **kwargs):
-    # Define a linear color map from red to yellow
-    colors = [(1, 1, .5), (1, 0, 0)]  # Red, orange, yellow
+    # Define a logarithmic mapping from frequency to colors
+    colors = [(1, 0, 0), (1, 0, 0), (1, 0.5, 0), (1, 1, 0), (1, 1, 0), (1, 1, 0)]  # Red, orange, yellow
     cmap = LinearSegmentedColormap.from_list("custom", colors)
 
-    # Calculate the color based on the frequency
+    # Calculate the logarithmic position along the color map
     max_freq = max(word_counts.values())
     freq = word_counts[word]
-    normalized_freq = freq / max_freq
-    rgba = cmap(normalized_freq)
+    log_freq = 1 - np.log(freq + 1) / np.log(max_freq + 1)  # Logarithmic scaling
+    position = log_freq
+
+    # Interpolate colors
+    rgba = cmap(position)
 
     # Convert RGBA values to integers
     rgba_int = tuple(int(255 * x) for x in rgba[:3])
